@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tabstop</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Tabstop fixes accessibility problems in your Shopify theme's code. Fixed price, ten business days, no widget.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;125,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow reading column; the brand device is a keyboard focus ring (yellow halo + ink outline) used on the one thing that matters in each section. */
+:root{
+  --paper:#f6f7f9; --ink:#12161d; --muted:#525b69; --line:#d9dde4; --panel:#ffffff;
+  --focus:#ffd400; --focus-ink:#12161d; --bad:#b3261e; --ok:#1e6b3a;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1217; --ink:#e8ebf0; --muted:#a0a8b5; --line:#2a303a; --panel:#161a21; --bad:#ff8a80; --ok:#7fd49b; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f1217; --ink:#e8ebf0; --muted:#a0a8b5; --line:#2a303a; --panel:#161a21; --bad:#ff8a80; --ok:#7fd49b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:46rem;margin:0 auto;padding-block:3rem 4rem;display:grid;gap:4.5rem}
+a{color:inherit;text-underline-offset:3px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--focus-ink);outline-offset:0;box-shadow:0 0 0 6px var(--focus);border-radius:2px}
+h1,h2{font-family:var(--display);text-wrap:balance;letter-spacing:-.01em;margin:0}
+h1{font-size:clamp(2.1rem,6vw,3.4rem);line-height:1.05;font-weight:800;font-stretch:125%}
+h2{font-size:1.6rem;line-height:1.15;font-weight:600;font-stretch:112%}
+p{margin:0}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ring{background:var(--focus);color:var(--focus-ink);box-shadow:0 0 0 3px var(--focus-ink);padding:.05em .3em;border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+header{display:grid;gap:1.25rem}
+.brand{display:flex;align-items:center;gap:.6rem;font:600 1rem var(--display);font-stretch:112%}
+.key{display:inline-grid;place-items:center;min-width:2.6rem;height:1.9rem;padding:0 .65rem;border:1.5px solid var(--ink);border-bottom-width:3px;border-radius:5px;font:500 .72rem var(--mono)}
+.lede{font-size:1.2rem;color:var(--muted);max-width:38rem}
+.cta{display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center}
+.btn{display:inline-block;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;padding:.8rem 1.2rem;border-radius:4px}
+.small{font-size:.9rem;color:var(--muted)}
+section{display:grid;gap:1.25rem}
+ul.plain{margin:0;padding:0;list-style:none;display:grid;gap:.7rem}
+ul.plain li{padding-left:1.4rem;position:relative}
+ul.plain li::before{content:"";position:absolute;left:0;top:.55em;width:.6rem;height:.6rem;border:2px solid var(--ink);border-radius:1px}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:1rem}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:2.2rem 1fr;gap:.75rem;align-items:start}
+ol.steps li::before{content:counter(s);font:500 .85rem/1.7rem var(--mono);text-align:center;border:1.5px solid var(--ink);border-bottom-width:3px;border-radius:5px}
+ol.steps b{display:block}
+.report{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+.report table{border-collapse:collapse;width:100%;min-width:32rem;font-size:.92rem}
+.report th,.report td{padding:.6rem .8rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.report th{font:500 .75rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.report td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.sev{font:600 .8rem var(--mono);color:var(--bad)}
+.cap{padding:.6rem .8rem;font-size:.85rem;color:var(--muted)}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
+.price{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:1.25rem;display:grid;gap:.6rem;align-content:start;min-width:0}
+.price.main{border:2px solid var(--ink);box-shadow:0 0 0 5px var(--focus)}
+.amount{font:800 2.2rem/1 var(--display);font-stretch:112%;font-variant-numeric:tabular-nums}
+.amount s{font-size:1.1rem;color:var(--muted);font-weight:600;margin-left:.4rem}
+details{border-top:1px solid var(--line);padding-block:.8rem}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600}
+details p{margin-top:.5rem;color:var(--muted)}
+.no{border-left:3px solid var(--ink);padding-left:1rem;display:grid;gap:.5rem}
+footer{border-top:1px solid var(--line);padding-top:1.5rem;font-size:.88rem;color:var(--muted);display:grid;gap:.35rem}
+code{font-family:var(--mono);font-size:.88em}
+@media (prefers-reduced-motion:no-preference){.btn{transition:transform .12s}.btn:hover{transform:translateY(-1px)}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><span class="key" aria-hidden="true">Tab ⇥</span> Tabstop <span class="small">· accessibility repair for Shopify stores</span></div>
+  <h1>Sued over your store's accessibility? We fix the <span class="ring">theme code</span> itself.</h1>
+  <p class="lede">Fixed price. Ten business days. Real changes to your Liquid, CSS and JavaScript that you preview before anything goes live. No overlay widget.</p>
+  <div class="cta">
+    <a class="btn" href="#free-report">Get a free scan of your store</a>
+    <span class="small">You get the report whether or not you hire us.</span>
+  </div>
+</header>
+
+<section aria-labelledby="why">
+  <h2 id="why">A widget is not a fix</h2>
+  <p>Most ADA website complaints are filed against online stores, and a settlement usually comes with a deadline to make the site usable with a screen reader and a keyboard. Overlay widgets don't change the code that screen readers read. The FTC fined one overlay vendor $1 million in 2025 over its claims, and stores with overlays installed keep getting sued.</p>
+  <p>Tabstop edits the code your theme actually ships: button names, form labels, focus order, contrast, image text, headings and the cart.</p>
+</section>
+
+<section aria-labelledby="sample">
+  <h2 id="sample">What the free report looks like</h2>
+  <p>We scan your home page, a collection, a product page and the cart against WCAG 2.0, 2.1 and 2.2 Level A and AA, and test whether the page can be used with the Tab key alone. Example rows from a real scan of a Shopify store, store name removed:</p>
+  <div class="report">
+    <table>
+      <thead><tr><th>Severity</th><th>Problem</th><th>WCAG</th><th>Elements</th></tr></thead>
+      <tbody>
+        <tr><td class="sev">critical</td><td>Buttons have no name a screen reader can say</td><td>4.1.2</td><td class="n">2</td></tr>
+        <tr><td class="sev">serious</td><td>Interactive controls nested inside each other</td><td>4.1.2</td><td class="n">1</td></tr>
+        <tr><td class="sev">serious</td><td>Tap targets smaller than 24 × 24 px</td><td>2.5.8</td><td class="n">205</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">Automated tools catch only part of what WCAG covers. We say so in every report, and we test keyboard paths by hand.</p>
+  </div>
+</section>
+
+<section aria-labelledby="how">
+  <h2 id="how">How it works</h2>
+  <ol class="steps">
+    <li><span><b>Send us your store address.</b>Within one business day you get the free scan report.</span></li>
+    <li><span><b>Download your theme file.</b>In Shopify: Online Store → Themes → … → Download theme file. You email it to us. We never need your admin login.</span></li>
+    <li><span><b>We fix the code.</b>Every change is listed in a change log next to the WCAG rule it addresses.</span></li>
+    <li><span><b>You preview it.</b>Upload the fixed theme as an unpublished copy, click through it, then publish when you're happy.</span></li>
+    <li><span><b>We re-scan and hand over.</b>A before-and-after report, the change log and a draft accessibility statement for your lawyer to review.</span></li>
+  </ol>
+</section>
+
+<section aria-labelledby="pricing">
+  <h2 id="pricing">Price</h2>
+  <div class="prices">
+    <div class="price main">
+      <p class="eyebrow">Theme repair</p>
+      <p class="amount">$1,500 <s>$2,400</s></p>
+      <p>Founding price for our first five stores, in exchange for honest feedback. After that it is $2,400.</p>
+      <ul class="plain">
+        <li>Home, collection, product, cart, header, footer and menus</li>
+        <li>Before-and-after scan report and change log</li>
+        <li>Draft accessibility statement</li>
+        <li>Delivered in ten business days from receiving your theme file</li>
+      </ul>
+      <a class="btn" href="https://buy.stripe.com/9B64gz2OQgE13Uagif6oo01">Start with the founding price</a>
+      <p class="small">Card payment on Stripe. We confirm scope by email before any work starts; if your theme is unusual and you'd rather not proceed, you get a full refund.</p>
+    </div>
+    <div class="price">
+      <p class="eyebrow">Monthly watch (optional)</p>
+      <p class="amount">$99<span class="small"> / month</span></p>
+      <p>New products, apps and theme updates bring problems back. Each month we re-scan and fix what the theme controls. Cancel any time.</p>
+    </div>
+  </div>
+  <div class="no">
+    <p><b>If we miss the delivery date, you get every dollar back.</b> If the re-scan still shows critical or serious failures in code your theme controls, we keep fixing at no charge or refund you in full. Your choice.</p>
+  </div>
+</section>
+
+<section aria-labelledby="not">
+  <h2 id="not">What we won't promise</h2>
+  <ul class="plain">
+    <li>We are not lawyers and this is not legal advice. We work alongside your attorney.</li>
+    <li>Nobody can make a site "lawsuit-proof". We make it work for people who use screen readers and keyboards, and we document what we changed.</li>
+    <li>Third-party apps (reviews, chat, pop-ups) run their own code. We list their problems and tell you which vendor to ask, but we can't edit their code.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="faq">
+  <h2 id="faq">Questions</h2>
+  <div>
+    <details><summary>We already have an accessibility widget. Isn't that enough?</summary><p>No. Widgets add a toolbar on top of the page but leave the underlying code as it is, and that code is what a screen reader reads. You can keep or remove the widget; our fixes don't depend on it.</p></details>
+    <details><summary>Do you need access to our Shopify admin?</summary><p>No. You send the theme file and upload the fixed copy yourself. If you prefer, you can add us as a collaborator instead.</p></details>
+    <details><summary>Our theme was customized by an agency. Does that matter?</summary><p>We work on the code as it is today, customizations included. If the theme is unusually large, we tell you before you pay and quote a fixed price for it.</p></details>
+    <details><summary>When do we pay?</summary><p>After you've seen the free report and agreed to the scope. Payment is by card through a Stripe link.</p></details>
+  </div>
+</section>
+
+<section id="free-report" aria-labelledby="start">
+  <h2 id="start">Get your free report</h2>
+  <p>Email your store address to <b id="contact">teodor@atwebstudio.org</b>. You get the report within one business day.</p>
+</section>
+
+<footer>
+  <p>Tabstop is the accessibility repair service of <a href="https://atwebstudio.org">AT Web Studio</a>. Contact: Teodor Georgiev, teodor@atwebstudio.org.</p>
+  <p>Scans use axe-core, the open-source engine also used by Google Lighthouse.</p>
+  <p><a href="ada-lawsuit-shopify.html">Got an ADA website complaint about your Shopify store? A plain checklist.</a></p>
+  <p>1321 Upland Dr. PMB 2270, Houston, TX 77043</p>
+</footer>
+</div>
+
+</body>
+</html>
